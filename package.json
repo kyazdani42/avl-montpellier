@@ -1,5 +1,6 @@
 {
-  "name": "api",
+  "name": "avl-montpellier",
+  "description": "An application to visualize available places in parkings and bike stations in montpellier",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",

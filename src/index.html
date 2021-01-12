@@ -17,10 +17,18 @@
       }
     </style>
 
-    <script id="data" type="application/json">{{#data}}</script>
+    <script id="data" type="application/json">
+      {{#data}}
+    </script>
 
+    <script src="https://d3js.org/d3.v6.min.js"></script>
     <script type="module">
-      import { Map, GeolocateControl } from 'https://cdn.skypack.dev/maplibre-gl';
+      import {
+        Map,
+        ScaleControl,
+        NavigationControl,
+        Marker,
+      } from 'https://cdn.skypack.dev/maplibre-gl';
 
       const mapTilerKey = 'tbBWXCICVY6bjRykjc44';
       const map = new Map({
@@ -30,16 +38,37 @@
         zoom: 12,
       });
 
-      map.addControl(
-        new GeolocateControl({
-          positionOptions: {
-            enableHighAccuracy: true,
-          },
-        })
-      );
+      map.addControl(new ScaleControl());
+      map.addControl(new NavigationControl());
 
-      const { bikeStations, parkingPlaces } = JSON.parse(document.getElementById('data').text); 
+      const { bikeStations, parkingPlaces } = JSON.parse(document.getElementById('data').text);
       console.log(bikeStations, parkingPlaces);
+      map.on('load', () => {
+        map.addSource('bikeStations', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: bikeStations.map(station => ({
+              type: 'Feature',
+              properties: {
+                color: d3.interpolateRdYlGn(station.fr / station.to),
+              },
+              geometry: { type: 'Point', coordinates: [station.lng, station.lat] },
+            })),
+          },
+        });
+        map.addLayer({
+          id: 'bikeStations',
+          type: 'circle',
+          source: 'bikeStations',
+          paint: {
+            'circle-radius': 10,
+            'circle-color': ['get', 'color'],
+            'circle-stroke-width': 0,
+            'circle-opacity': 1,
+          },
+        });
+      });
     </script>
     <link rel="stylesheet" href="https://cdn.skypack.dev/maplibre-gl/dist/mapbox-gl.css" />
   </body>
